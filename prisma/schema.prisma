@@ -14,10 +14,30 @@ model User {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   UserToken UserToken?
+  File      File[]
+  UserQuota UserQuota?
 }
 
 model UserToken {
   user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      String @unique
   hashedToken String
+}
+
+model UserQuota {
+  userId    String  @unique
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  usedQuota Decimal @default(0)
+}
+
+model File {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String?
+  objectName String   @unique
+  size       Decimal
+  type       String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
