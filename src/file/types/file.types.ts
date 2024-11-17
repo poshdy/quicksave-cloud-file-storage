@@ -4,7 +4,7 @@ export type FileQuery = {
 };
 
 export type FileParams = {
-  fileName: string;
+  objectName: string;
 };
 
 export type UploadedFile = {

@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsEmail, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsEmail, IsOptional, IsString } from 'class-validator';
 
 export class SendPreviewMailPayload {
   @IsEmail()
@@ -9,4 +9,14 @@ export class SendPreviewMailPayload {
   @IsString()
   @Transform(({ value }) => value == null && '2')
   duration: string;
+}
+
+export class UpdateFileNamePayload {
+  @IsString()
+  name: string;
+}
+
+export class StarObject {
+  @IsBoolean()
+  isStared: boolean;
 }

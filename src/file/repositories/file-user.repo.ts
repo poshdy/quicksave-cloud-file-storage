@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { IFileUserRepoistory } from '../interfaces/file.repo.interface';
+import { IFileUserRepository } from '../interfaces/file.repo.interface';
 import { DatabaseService } from 'src/core/database/database.service';
 import { CurrentUser } from 'src/core/users/types/user.types';
 import { UserQuota } from '@prisma/client';
 
 @Injectable()
-export class FileUserRepo implements IFileUserRepoistory {
+export class FileUserRepo implements IFileUserRepository {
   constructor(private readonly database: DatabaseService) {}
   async increaseQuota(user: CurrentUser, size: number): Promise<UserQuota> {
     return await this.database.userQuota.update({

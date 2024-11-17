@@ -31,13 +31,15 @@ model UserQuota {
 }
 
 model File {
-  id         String   @id @default(uuid())
+  id         String  @id @default(uuid())
   userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   name       String?
-  objectName String   @unique
+  objectName String  @unique
   size       Decimal
   type       String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+
+  isStared  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

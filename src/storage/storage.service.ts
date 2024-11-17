@@ -57,4 +57,8 @@ export class StorageService {
       .file(objectName)
       .getSignedUrl({ action: 'read', expires: Date.now() + 15 * 60 * 1000 });
   }
+
+  async delete(objectName: string) {
+    await this.bucket.file(objectName).delete();
+  }
 }

@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { IFileRepoistory } from '../interfaces/file.repo.interface';
+import { IFileRepository } from '../interfaces/file.repo.interface';
 import { DatabaseService } from 'src/core/database/database.service';
 import { CurrentUser } from 'src/core/users/types/user.types';
-import { FileQuery, UploadedFile } from '../types/file.types';
+import { FileParams, FileQuery, UploadedFile } from '../types/file.types';
 import { File } from '@prisma/client';
+import { StarObject } from '../dtos/file.dto';
 
 @Injectable()
-export class FileRepo implements IFileRepoistory {
+export class FileRepo implements IFileRepository {
   constructor(private readonly database: DatabaseService) {}
   async save(user: CurrentUser, file: UploadedFile): Promise<File> {
     return await this.database.file.create({
@@ -41,5 +42,21 @@ export class FileRepo implements IFileRepoistory {
     return await this.database.file.delete({
       where: { objectName, userId: user.id },
     });
+  }
+
+  async starObject(
+    user: CurrentUser,
+    params: FileParams,
+    body: StarObject,
+  ): Promise<File> {
+    const file = await this.database.file.update({
+      where: { objectName: params.objectName, user: { email: user.email } },
+      data: { isStared: body.isStared },
+    });
+
+    return file;
+  }
+  async getFileByName(objectName: string): Promise<File> {
+    return await this.database.file.findUnique({ where: { objectName } });
   }
 }
