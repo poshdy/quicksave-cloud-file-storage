@@ -12,7 +12,15 @@ export class RefreshTokenStrategy extends PassportStrategy(
 ) {
   constructor(private readonly configService: ConfigService) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (request: Request) => {
+          let token = null;
+          if (request && request.cookies) {
+            token = request.cookies['quicksaveToken'];
+          }
+          return token;
+        },
+      ]),
       secretOrKey: configService.getOrThrow('REFRESH_TOKEN_SECRET'),
       passReqToCallback: true,
       ignoreExpiration: false,
@@ -20,10 +28,7 @@ export class RefreshTokenStrategy extends PassportStrategy(
   }
 
   async validate(request: Request, payload: UserPayload) {
-    const refresh_token = request
-      .get('authorization')
-      .replace('Bearer', '')
-      .trim();
+    const refresh_token = request.cookies['quicksaveToken'];
     return {
       ...payload,
       refresh_token,

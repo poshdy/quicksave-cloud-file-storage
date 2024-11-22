@@ -12,6 +12,7 @@ import { StorageService } from 'src/storage/storage.service';
 import { File } from '@prisma/client';
 import { Response } from 'express';
 import { FileServiceHelper } from './file.service.helper';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class FileService implements IFileSerive {
@@ -19,6 +20,7 @@ export class FileService implements IFileSerive {
     private readonly fileHelper: FileServiceHelper,
     private readonly fileRepo: FileRepo,
     private readonly storage: StorageService,
+    private readonly events: EventEmitter2,
   ) {}
   async upload(user: CurrentUser, files: Express.Multer.File[]): Promise<void> {
     for (let i = 0; i < files?.length; i++) {
@@ -32,6 +34,7 @@ export class FileService implements IFileSerive {
       await this.storage.upload(file, data.objectName);
 
       await this.fileRepo.save(user, data);
+      await this.events.emitAsync('file.uploaded', user, file.size);
     }
   }
   async getFiles(user: CurrentUser, query: FileQuery): Promise<File[]> {

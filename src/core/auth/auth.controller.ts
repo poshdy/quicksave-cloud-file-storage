@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './services/auth.service';
 import { IAuthController } from './interfaces/auth-controller';
-import { Message, Tokens, UserReturnTypeWithTokens } from './types/auth.types';
+import { Message, Tokens } from './types/auth.types';
 import { Request, Response } from 'express';
 import { GoogleGuard } from './guards/google.guard';
 import { LoginPayload } from './dtos/auth-dto';
@@ -47,12 +47,12 @@ export class AuthController implements IAuthController {
     @Res() res: Response,
     @Body() body: LoginPayload,
   ): Promise<Message> {
-    const mess = await this.authService.sendMagicLink(
+    const data = await this.authService.sendMagicLink(
       req,
       res,
       body.destination,
     );
-    return mess;
+    return data;
   }
 
   @HttpCode(HttpStatus.OK)
@@ -60,10 +60,22 @@ export class AuthController implements IAuthController {
   @Get('/login/callback')
   async verify(
     @GetCurrentUser() user: { email: string },
-  ): Promise<UserReturnTypeWithTokens> {
+    @Res() res: Response,
+  ): Promise<void> {
     const data = await this.authService.verify(user.email);
 
-    return data;
+    res.cookie('quicksaveToken', data.refresh_token, {
+      httpOnly: true,
+      path: '/',
+      domain: 'localhost',
+      maxAge: 259200000,
+    });
+    res.send({
+      id: data.id,
+      name: data.name,
+      email: data.email,
+      access_token: data.access_token,
+    });
   }
 
   @UseGuards(RefreshTokenGuard)

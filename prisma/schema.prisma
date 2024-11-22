@@ -25,9 +25,9 @@ model UserToken {
 }
 
 model UserQuota {
-  userId    String  @unique
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  usedQuota Decimal @default(0)
+  userId    String @unique
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  usedQuota Int    @default(0) // in bytes
 }
 
 model File {

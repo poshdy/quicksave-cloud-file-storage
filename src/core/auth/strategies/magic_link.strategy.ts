@@ -22,11 +22,13 @@ export class MagicLinkStrategy extends PassportStrategy(
         expiresIn: '5m',
       },
 
-      callbackUrl: configService.getOrThrow('CALLBACK_URL'),
+      callbackUrl: 'http://localhost:3000/auth/sign-in/callback',
       sendMagicLink: async (destination: string, link: string) => {
         await this.mailService.sendMagicLink(destination, link);
+        return link;
       },
       verify: async (payload, callback) => {
+        console.log(payload);
         callback(null, this.validate(payload));
       },
     });

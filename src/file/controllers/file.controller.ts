@@ -14,22 +14,23 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileService } from './services/file.service';
+import { FileService } from '../services/file.service';
 import { AuthenticationGuard } from 'src/core/auth/guards/authentication.guard';
-import { IFileController } from './interfaces/file.controller.interface';
+import { IFileController } from '../interfaces/file.controller.interface';
 import { CurrentUser } from 'src/core/users/types/user.types';
-import { FileParams, FileQuery } from './types/file.types';
+import { FileParams, FileQuery } from '../types/file.types';
 import {
   SendPreviewMailPayload,
   StarObject,
   UpdateFileNamePayload,
-} from './dtos/file.dto';
+} from '../dtos/file.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { GetCurrentUser } from 'src/common/decorators/get-current-user.decorator';
 import { Message } from 'src/core/auth/types/auth.types';
 import { File } from '@prisma/client';
 import { Response } from 'express';
-import { IsOwner } from './guards/is-owner.guard';
+import { IsOwner } from '../guards/is-owner.guard';
+import { CanUpload } from '../guards/can-upload.guard';
 
 @UseGuards(AuthenticationGuard)
 @Controller('files')
@@ -37,7 +38,7 @@ export class FileController implements IFileController {
   constructor(private readonly fileService: FileService) {}
 
   @HttpCode(HttpStatus.CREATED)
-  @UseInterceptors(FilesInterceptor('files'))
+  @UseInterceptors(FilesInterceptor('files'), CanUpload)
   @Post('/upload')
   async upload(
     @GetCurrentUser() user: CurrentUser,

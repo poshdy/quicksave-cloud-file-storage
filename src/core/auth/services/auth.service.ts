@@ -59,7 +59,7 @@ export class AuthService implements IAuthServiceController {
     if (!user) {
       throw new NotFoundException('this user is not found');
     }
-    await this.magic.send(req, res);
+    const data = await this.magic.send(req, res);
     return { message: 'Check your email!' };
   }
   async verify(email: string): Promise<UserReturnTypeWithTokens> {

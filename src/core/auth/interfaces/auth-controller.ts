@@ -6,7 +6,7 @@ export interface IAuthController {
   googleRegister(): Promise<Message>;
   googleCallback(req: Request): Promise<any>;
   login(req: Request, res: Response, body: LoginPayload): Promise<Message>;
-  verify(user: { email: string }): Promise<UserReturnTypeWithTokens>;
+  verify(user: { email: string }, res: Response): Promise<void>;
   refresh(user: { email: string; refresh_token: string }): Promise<Tokens>;
   logout(user: { email: string }): Promise<Message>;
 }
