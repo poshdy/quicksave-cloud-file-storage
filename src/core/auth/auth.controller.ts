@@ -36,8 +36,20 @@ export class AuthController implements IAuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(GoogleGuard)
   @Get('/google/callback')
-  async googleCallback(@Req() req: Request) {
-    return req.user;
+  async googleCallback(@Req() req: Request, @Res() res: Response) {
+    const data = req.user as any;
+    res.cookie('quicksaveToken', data.refresh_token, {
+      httpOnly: true,
+      path: '/',
+      domain: 'localhost',
+      maxAge: 259200000,
+    });
+    res.send({
+      id: data.id,
+      name: data.name,
+      email: data.email,
+      access_token: data.access_token,
+    });
   }
 
   @HttpCode(HttpStatus.OK)
@@ -83,9 +95,16 @@ export class AuthController implements IAuthController {
   @Get('/refresh')
   async refresh(
     @GetCurrentUser() user: { email: string; refresh_token: string },
-  ): Promise<Tokens> {
+    @Res() res: Response,
+  ): Promise<void> {
     const data = await this.authService.refresh(user.email, user.refresh_token);
-    return data;
+    res.cookie('quicksaveToken', data.refresh_token, {
+      httpOnly: true,
+      path: '/',
+      domain: 'localhost',
+      maxAge: 259200000,
+    });
+    res.send({ access_token: data.access_token });
   }
 
   @UseGuards(AuthenticationGuard)
