@@ -30,7 +30,7 @@ export interface IFileController {
   ): Promise<File>;
   getFile(user: CurrentUser, params: FileParams): Promise<any>;
   getFiles(user: CurrentUser, query: FileQuery): Promise<any[]>;
-  getPreview(user: CurrentUser, params: FileParams): Promise<any>;
+  getPreviewLink(user: CurrentUser, params: FileParams): Promise<string>;
   sendPreviewLink(
     user: CurrentUser,
     params: FileParams,

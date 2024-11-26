@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   CallHandler,
-  CanActivate,
   ExecutionContext,
   Injectable,
   NestInterceptor,
@@ -21,23 +20,25 @@ export class CanUpload implements NestInterceptor {
   ): Promise<Observable<any>> {
     const request: Request = context.switchToHttp().getRequest();
 
-    const files = request?.files;
-
-    console.log(files);
-    const file = files[0];
+    const files = request?.files as Express.Multer.File[];
     const user = await this.userFileRepo.getUserQuota(
       request?.user as CurrentUser,
     );
 
-    const canUpload =
-      user.usedQuota < this.STANDARD_PLAN_QUOTA &&
-      file.size + user.usedQuota < this.STANDARD_PLAN_QUOTA;
+    if (files) {
+      files?.forEach((file) => {
+        const canUpload =
+          user.usedQuota < this.STANDARD_PLAN_QUOTA &&
+          file.size + user.usedQuota < this.STANDARD_PLAN_QUOTA;
 
-    if (!canUpload) {
-      throw new BadRequestException(
-        "you can't upload this file you have exceeded your free quota",
-      );
+        if (!canUpload) {
+          throw new BadRequestException(
+            "you can't upload this file you have exceeded your free quota",
+          );
+        }
+      });
     }
+
     return next.handle();
   }
 }

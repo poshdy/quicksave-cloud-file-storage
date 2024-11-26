@@ -1,5 +1,4 @@
 import { CurrentUser } from 'src/core/users/types/user.types';
-import { IFileController } from './file.controller.interface';
 import { FileParams, FileQuery } from '../types/file.types';
 import {
   SendPreviewMailPayload,
@@ -10,7 +9,7 @@ import { Response } from 'express';
 import { File } from '@prisma/client';
 
 export interface IFileSerive {
-  upload(user: CurrentUser, files: Express.Multer.File[]): Promise<any>;
+  upload(user: CurrentUser, files: Express.Multer.File[]): Promise<void>;
   updateFile(
     user: CurrentUser,
     params: FileParams,
@@ -22,15 +21,16 @@ export interface IFileSerive {
     user: CurrentUser,
     params: FileParams,
   ): Promise<any>;
+
   getFile(user: CurrentUser, params: FileParams): Promise<File>;
-  getPreview(user: CurrentUser, params: FileParams): Promise<any>;
+  getPreviewLink(user: CurrentUser, params: FileParams): Promise<string>;
   sendPreviewLink(
     user: CurrentUser,
     params: FileParams,
     body: SendPreviewMailPayload,
   ): Promise<any>;
 
-  deleteFile(user: CurrentUser, params: FileParams): Promise<any>;
+  deleteFile(user: CurrentUser, params: FileParams): Promise<void>;
   starObject(
     user: CurrentUser,
     params: FileParams,

@@ -5,7 +5,9 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  NotImplementedException,
   Param,
+  ParseFilePipeBuilder,
   Patch,
   Post,
   Query,
@@ -30,7 +32,8 @@ import { Message } from 'src/core/auth/types/auth.types';
 import { File } from '@prisma/client';
 import { Response } from 'express';
 import { IsOwner } from '../guards/is-owner.guard';
-import { CanUpload } from '../guards/can-upload.guard';
+import { FILE_TYPES, MAX_FILE_SIZE } from 'src/constants';
+import { CanUpload } from '../interceptors/can-upload.interceptor';
 
 @UseGuards(AuthenticationGuard)
 @Controller('files')
@@ -38,14 +41,24 @@ export class FileController implements IFileController {
   constructor(private readonly fileService: FileService) {}
 
   @HttpCode(HttpStatus.CREATED)
-  @UseInterceptors(FilesInterceptor('files'), CanUpload)
+  @UseInterceptors(FilesInterceptor('files', 5), CanUpload)
   @Post('/upload')
   async upload(
     @GetCurrentUser() user: CurrentUser,
-    @UploadedFiles() files: Express.Multer.File[],
+    @UploadedFiles(
+      new ParseFilePipeBuilder()
+        .addMaxSizeValidator({
+          maxSize: Number(MAX_FILE_SIZE),
+          message: 'Max file size is 5mb',
+        })
+        .addFileTypeValidator({
+          fileType: FILE_TYPES,
+        })
+        .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY }),
+    )
+    files: Express.Multer.File[],
   ): Promise<Message> {
     await this.fileService.upload(user, files);
-
     return { message: 'file uploaded successfully!' };
   }
 
@@ -77,11 +90,11 @@ export class FileController implements IFileController {
   @UseGuards(IsOwner)
   @HttpCode(HttpStatus.OK)
   @Get(':objectName/preview')
-  async getPreview(
+  async getPreviewLink(
     user: CurrentUser,
     @Query() params: FileParams,
   ): Promise<any> {
-    return await this.fileService.getPreview(user, params);
+    return await this.fileService.getPreviewLink(user, params);
   }
 
   @UseGuards(IsOwner)
@@ -127,5 +140,7 @@ export class FileController implements IFileController {
     user: CurrentUser,
     params: FileParams,
     body: SendPreviewMailPayload,
-  ): Promise<any> {}
+  ): Promise<any> {
+    throw new NotImplementedException();
+  }
 }

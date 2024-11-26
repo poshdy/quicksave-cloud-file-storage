@@ -50,7 +50,7 @@ export class FileService implements IFileSerive {
   async getFile(user: CurrentUser, params: FileParams): Promise<File> {
     return await this.fileRepo.getOne(user, params.objectName);
   }
-  async getPreview(user: CurrentUser, params: FileParams): Promise<any> {
+  async getPreviewLink(user: CurrentUser, params: FileParams): Promise<string> {
     const file = await this.fileRepo.getOne(user, params.objectName);
 
     return await this.storage.genearateSignedUrl(file?.objectName);

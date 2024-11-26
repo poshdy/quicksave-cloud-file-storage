@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { GetSignedUrlResponse, Storage } from '@google-cloud/storage';
+import {
+  GetSignedUrlConfig,
+  GetSignedUrlResponse,
+  Storage,
+} from '@google-cloud/storage';
 import { IStorage } from './interfaces/storage.interface';
 import * as path from 'node:path';
 import { ConfigService } from '@nestjs/config';
@@ -17,6 +21,7 @@ export class StorageService {
   private bucket = this.storage.bucket(
     this.configService.getOrThrow('BUCKET_NAME'),
   );
+
   async download(stream: Response, objectName: string) {
     const file = this.bucket.file(objectName).createReadStream();
     file.on('data', (chunk) => {
@@ -52,10 +57,16 @@ export class StorageService {
     });
   }
 
-  async genearateSignedUrl(objectName: string) {
-    return await this.bucket
-      .file(objectName)
-      .getSignedUrl({ action: 'read', expires: Date.now() + 15 * 60 * 1000 });
+  async genearateSignedUrl(objectName: string): Promise<string> {
+    const options: GetSignedUrlConfig = {
+      version: 'v4',
+      action: 'read',
+      expires: Date.now() + 15 * 60 * 1000,
+      contentType: 'application/octet-stream',
+    };
+
+    const [url] = await this.bucket.file(objectName).getSignedUrl(options);
+    return url;
   }
 
   async delete(objectName: string) {
